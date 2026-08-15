@@ -1,0 +1,13 @@
+# Carpeta específica a ignorar
+.agents/
+.agents/*
+
+# Archivos del sistema y dependencias de Node / PNPM
+node_modules/
+.pnpm-store/
+dist/
+.env
+.env*
+.env.local
+*.log
+.DS_Store
