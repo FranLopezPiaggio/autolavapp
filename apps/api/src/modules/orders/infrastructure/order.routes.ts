@@ -1,15 +1,15 @@
 import type { FastifyInstance } from 'fastify';
 import { CreateOrderUseCase } from '../application/create-order.use-case.js';
 import { ChangeOrderStatusUseCase } from '../application/change-order-status.use-case.js';
-import { InMemoryOrderRepository } from './in-memory-order.repository.js';
+import { PostgresOrderRepository } from './postgres-order.repository.js';
 import type { ServiceItem, Order, OrderStatus } from '../domain/order.entity.js';
 
-const orderRepository = new InMemoryOrderRepository();
+const orderRepository = new PostgresOrderRepository();
 const createOrderUseCase = new CreateOrderUseCase(orderRepository);
 const changeOrderStatusUseCase = new ChangeOrderStatusUseCase(orderRepository);
 
 export async function orderRoutes(fastify: FastifyInstance) {
-    // POST /orders
+    // 1. POST /orders (ÚNICO)
     fastify.post('/orders', async (request, reply) => {
         const body = request.body as {
             customerName: string;
@@ -21,13 +21,13 @@ export async function orderRoutes(fastify: FastifyInstance) {
         return reply.status(201).send(order.toJSON());
     });
 
-    // GET /orders
+    // 2. GET /orders
     fastify.get('/orders', async () => {
         const orders: Order[] = await orderRepository.findAll();
         return orders.map((order: Order) => order.toJSON());
     });
 
-    // GET /orders/:id
+    // 3. GET /orders/:id
     fastify.get('/orders/:id', async (request, reply) => {
         const { id } = request.params as { id: string };
         const order = await orderRepository.findById(id);
@@ -39,7 +39,7 @@ export async function orderRoutes(fastify: FastifyInstance) {
         return reply.send(order.toJSON());
     });
 
-    // PATCH /orders/:id/status
+    // 4. PATCH /orders/:id/status
     fastify.patch('/orders/:id/status', async (request, reply) => {
         const { id } = request.params as { id: string };
         const { status } = request.body as { status: OrderStatus };
