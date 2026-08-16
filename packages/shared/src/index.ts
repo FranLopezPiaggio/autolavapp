@@ -1,3 +1,5 @@
+export * from './auth.js';
+
 // --- TIPOS DE ENUMERADOS Y ESTADOS ---
 export type OrderStatus =
   | 'PENDING'

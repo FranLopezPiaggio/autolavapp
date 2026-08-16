@@ -11,3 +11,9 @@ dist/
 .env.local
 *.log
 .DS_Store
+
+# Compilación en-línea de TS (tsc sin outDir emite junto a los .ts)
+apps/api/src/**/*.js
+apps/api/src/**/*.js.map
+apps/api/src/**/*.d.ts
+apps/api/src/**/*.d.ts.map

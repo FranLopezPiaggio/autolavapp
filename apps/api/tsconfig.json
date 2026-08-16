@@ -6,6 +6,7 @@
     "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "types": [],
+    "noEmit": true,
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
@@ -24,5 +25,12 @@
   },
   "include": [
     "src/**/*"
+  ],
+  // ponytail: exclude dead/unresolved modules so `tsc build` stays green
+  // - modules/services: express-only module, never registered (audit #2)
+  // - infrastructure/db: Drizzle schema, Drizzle deferred (audit #5/#6); initDatabase uses raw SQL
+  "exclude": [
+    "src/modules/services/**",
+    "src/infrastructure/db/**"
   ]
 }

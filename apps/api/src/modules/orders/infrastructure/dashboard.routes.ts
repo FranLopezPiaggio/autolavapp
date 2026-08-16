@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { pool } from '../../../infrastructure/database.js';
 
 export async function dashboardRoutes(fastify: FastifyInstance) {
-  fastify.get('/dashboard/summary', async () => {
+  fastify.get('/dashboard/summary', { onRequest: [fastify.authenticate] }, async () => {
     const result = await pool.query(`
       SELECT
         COALESCE(SUM(CASE WHEN created_at::date = CURRENT_DATE AND status = 'COMPLETED' THEN total_amount ELSE 0 END), 0) AS today_revenue,

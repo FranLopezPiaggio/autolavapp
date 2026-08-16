@@ -1,9 +1,10 @@
 import { Order } from '../domain/order.entity.js';
-import type { OrderRepository } from '../domain/order.repository.js';
+import type { OrderRepository, StatusChangeAudit } from '../domain/order.repository.js';
 
 export class InMemoryOrderRepository implements OrderRepository {
     // Declaramos que el Map guarda: Clave (string - ID) y Valor (instancia de Order)
     private orders: Map<string, Order> = new Map<string, Order>();
+    public audits: StatusChangeAudit[] = [];
 
     // ORDER SEED FOR TESTS
     constructor() {
@@ -34,5 +35,9 @@ export class InMemoryOrderRepository implements OrderRepository {
     // Devuelve un arreglo de órdenes
     async findAll(): Promise<Order[]> {
         return Array.from(this.orders.values());
+    }
+
+    async recordStatusChange(audit: StatusChangeAudit): Promise<void> {
+        this.audits.push(audit);
     }
 }

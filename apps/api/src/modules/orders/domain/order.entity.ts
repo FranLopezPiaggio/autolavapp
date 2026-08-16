@@ -1,42 +1,71 @@
-export type OrderStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+// OrderStatus alineado con PRD / @repo/shared (6 estados)
+export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'READY' | 'COMPLETED' | 'CANCELLED';
 
 export interface ServiceItem {
     id: string;
-    name: string;   // Ej: "Lavado completo", "Limpieza de tapizado"
+    name: string;
     price: number;
 }
 
 export interface OrderProps {
     id: string;
     customerName: string;
-    vehiclePlate: string; // Patente/Matrícula del vehículo
+    vehiclePlate: string;
     services: ServiceItem[];
     status: OrderStatus;
     totalAmount: number;
     createdAt: Date;
+    customerId?: string;
+    vehicleId?: string;
+    scheduledAt?: Date;
+}
+
+// Transiciones permitidas (PRD §Strict State Machine)
+const TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+    PENDING: ['CONFIRMED'],
+    CONFIRMED: ['IN_PROGRESS', 'CANCELLED'],
+    IN_PROGRESS: ['READY'],
+    READY: ['COMPLETED'],
+    COMPLETED: [],
+    CANCELLED: [],
+};
+
+export class InvalidStatusTransitionError extends Error {
+    constructor(from: OrderStatus, to: OrderStatus) {
+        super(`Invalid status transition: ${from} -> ${to}`);
+        this.name = 'InvalidStatusTransitionError';
+    }
 }
 
 export class Order {
-    constructor(private props: OrderProps) { }
+    constructor(private props: OrderProps) {
+        // Snapshot inmutable: congelar el array de servicios
+        this.props = {
+            ...props,
+            services: Object.freeze([...props.services]) as ServiceItem[],
+        };
+    }
 
-    // Getter para exponer propiedades de forma inmutable
     get id(): string { return this.props.id; }
     get customerName(): string { return this.props.customerName; }
     get vehiclePlate(): string { return this.props.vehiclePlate; }
-    get services(): ServiceItem[] { return this.props.services; }
+    get customerId(): string | undefined { return this.props.customerId; }
+    get vehicleId(): string | undefined { return this.props.vehicleId; }
+    get scheduledAt(): Date | undefined { return this.props.scheduledAt; }
+    get services(): ServiceItem[] { return [...this.props.services]; }
     get status(): OrderStatus { return this.props.status; }
     get totalAmount(): number { return this.props.totalAmount; }
     get createdAt(): Date { return this.props.createdAt; }
 
-    // Regla de negocio del dominio: Cambiar estado
     public changeStatus(newStatus: OrderStatus): void {
-        if (this.props.status === 'COMPLETED' || this.props.status === 'CANCELLED') {
-            throw new Error(`No se puede cambiar el estado de una orden ${this.props.status.toLowerCase()}`);
+        const allowed = TRANSITIONS[this.props.status] ?? [];
+        if (!allowed.includes(newStatus)) {
+            throw new InvalidStatusTransitionError(this.props.status, newStatus);
         }
         this.props.status = newStatus;
     }
 
     public toJSON(): OrderProps {
-        return { ...this.props };
+        return { ...this.props, services: [...this.props.services] };
     }
 }

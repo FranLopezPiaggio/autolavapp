@@ -10,7 +10,7 @@ const changeOrderStatusUseCase = new ChangeOrderStatusUseCase(orderRepository);
 
 export async function orderRoutes(fastify: FastifyInstance) {
     // 1. POST /orders (ÚNICO)
-    fastify.post('/orders', async (request, reply) => {
+    fastify.post('/orders', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         const body = request.body as {
             customerName: string;
             vehiclePlate: string;
@@ -40,15 +40,19 @@ export async function orderRoutes(fastify: FastifyInstance) {
     });
 
     // 4. PATCH /orders/:id/status
-    fastify.patch('/orders/:id/status', async (request, reply) => {
+    fastify.patch('/orders/:id/status', { onRequest: [fastify.authenticate] }, async (request, reply) => {
         const { id } = request.params as { id: string };
-        const { status } = request.body as { status: OrderStatus };
+        const { status, reason } = request.body as { status: OrderStatus; reason?: string };
+        const user = request.user as { email?: string } | undefined;
 
         try {
-            const updatedOrder = await changeOrderStatusUseCase.execute({
+            const input: import('../application/change-order-status.use-case.js').ChangeOrderStatusInput = {
                 orderId: id,
                 newStatus: status,
-            });
+                changedBy: user?.email ?? 'ADMIN',
+            };
+            if (reason) input.reason = reason;
+            const updatedOrder = await changeOrderStatusUseCase.execute(input);
             return reply.send(updatedOrder.toJSON());
         } catch (error) {
             return reply.status(400).send({ message: (error as Error).message });
