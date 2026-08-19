@@ -3,7 +3,7 @@ import { Order } from '../domain/order.entity.js';
 import type { OrderStatus, ServiceItem } from '../domain/order.entity.js';
 import type { OrderRepository, StatusChangeAudit } from '../domain/order.repository.js';
 
-// Estructura de la fila tal como retorna de PostgreSQL
+// Row shape as returned by PostgreSQL
 interface OrderRow {
     id: string;
     customer_name: string;
@@ -83,7 +83,7 @@ export class PostgresOrderRepository implements OrderRepository {
         ]);
     }
 
-    // Convierte el registro SQL plano a la Entidad del Dominio
+    // Maps a flat SQL row to the Domain Entity
     private mapToDomain(row: OrderRow): Order {
         const props: ConstructorParameters<typeof Order>[0] = {
             id: row.id,

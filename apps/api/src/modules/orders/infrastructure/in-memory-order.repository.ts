@@ -2,13 +2,13 @@ import { Order } from '../domain/order.entity.js';
 import type { OrderRepository, StatusChangeAudit } from '../domain/order.repository.js';
 
 export class InMemoryOrderRepository implements OrderRepository {
-    // Declaramos que el Map guarda: Clave (string - ID) y Valor (instancia de Order)
+    // Map key: id (string), value: Order instance
     private orders: Map<string, Order> = new Map<string, Order>();
     public audits: StatusChangeAudit[] = [];
 
     // ORDER SEED FOR TESTS
     constructor() {
-        // Datos semilla para que nunca esté vacío al reiniciar
+        // Seed data so it is never empty on restart
         const seedOrder = new Order({
             id: '123e4567-e89b-12d3-a456-426614174000',
             customerName: 'Cliente Prueba',
@@ -22,17 +22,17 @@ export class InMemoryOrderRepository implements OrderRepository {
         this.orders.set(seedOrder.id, seedOrder);
     }
 
-    // Devuelve una promesa sin valor de retorno (void)
+    // Returns a void promise
     async save(order: Order): Promise<void> {
         this.orders.set(order.id, order);
     }
 
-    // Devuelve la orden encontrada o null
+    // Returns the found order or null
     async findById(id: string): Promise<Order | null> {
         return this.orders.get(id) || null;
     }
 
-    // Devuelve un arreglo de órdenes
+    // Returns an array of orders
     async findAll(): Promise<Order[]> {
         return Array.from(this.orders.values());
     }

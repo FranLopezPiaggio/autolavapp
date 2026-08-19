@@ -74,6 +74,21 @@ export interface OrderDTO {
 
 // --- DTOs PARA CREACIÓN Y MIGRACIÓN DE RESERVAS ---
 
+export interface CheckAvailabilityDTO {
+  date: string; // YYYY-MM-DD
+  serviceIds: string[];
+}
+
+export interface AvailableSlotDTO {
+  startTime: string; // ISO string
+  endTime: string;
+}
+
+export interface CheckAvailabilityResponseDTO {
+  date: string;
+  availableSlots: AvailableSlotDTO[];
+}
+
 export interface CreateBookingDTO {
   customerName: string;
   customerPhone: string;

@@ -1,4 +1,4 @@
-// OrderStatus alineado con PRD / @repo/shared (6 estados)
+// OrderStatus aligned with PRD / @repo/shared (6 states)
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'READY' | 'COMPLETED' | 'CANCELLED';
 
 export interface ServiceItem {
@@ -20,7 +20,7 @@ export interface OrderProps {
     scheduledAt?: Date;
 }
 
-// Transiciones permitidas (PRD §Strict State Machine)
+// Allowed transitions (PRD §Strict State Machine)
 const TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
     PENDING: ['CONFIRMED'],
     CONFIRMED: ['IN_PROGRESS', 'CANCELLED'],
@@ -39,7 +39,7 @@ export class InvalidStatusTransitionError extends Error {
 
 export class Order {
     constructor(private props: OrderProps) {
-        // Snapshot inmutable: congelar el array de servicios
+        // Immutable snapshot: freeze the services array
         this.props = {
             ...props,
             services: Object.freeze([...props.services]) as ServiceItem[],

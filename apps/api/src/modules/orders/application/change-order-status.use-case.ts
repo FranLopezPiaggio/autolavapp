@@ -20,13 +20,13 @@ export class ChangeOrderStatusUseCase {
 
         const previousStatus = order.status;
 
-        // Ejecuta la regla de negocio encapsulated en la Entidad
+        // Execute the business rule encapsulated in the Entity
         order.changeStatus(input.newStatus);
 
-        // Guarda el estado actualizado
+        // Persist updated status
         await this.orderRepository.save(order);
 
-        // Soft update: entrada inmutable en order_audits
+        // Soft update: immutable entry in order_audits
         const audit: import('../domain/order.repository.js').StatusChangeAudit = {
             orderId: order.id,
             previousStatus,
